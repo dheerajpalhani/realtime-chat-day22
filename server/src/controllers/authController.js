@@ -150,3 +150,28 @@ export const logout = async (req, res) => {
     message: 'Logged out successfully',
   });
 };
+
+/**
+ * @desc    Search users by name or username
+ * @route   GET /api/auth/users
+ * @access  Private
+ */
+export const searchUsers = async (req, res) => {
+  const search = req.query.search || '';
+  
+  const users = await User.find({
+    _id: { $ne: req.user._id },
+    $or: [
+      { name: { $regex: search, $options: 'i' } },
+      { username: { $regex: search, $options: 'i' } },
+    ],
+  })
+    .select('-password')
+    .limit(10)
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    data: users,
+  });
+};

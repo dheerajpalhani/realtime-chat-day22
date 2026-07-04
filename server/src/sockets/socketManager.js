@@ -90,7 +90,7 @@ const socketManager = (io) => {
     });
 
     // --- B. Send Message Event ---
-    socket.on('send-message', async ({ conversationId, receiverId, message }, callback) => {
+    socket.on('send-message', async ({ conversationId, receiverId, message, messageType, image, file }, callback) => {
       try {
         if (!conversationId || !receiverId || !message) {
           return callback?.({ success: false, message: 'Missing conversationId, receiverId or message' });
@@ -116,6 +116,9 @@ const socketManager = (io) => {
           sender: userId,
           receiver: receiverId,
           message,
+          messageType: messageType || 'text',
+          image: image || '',
+          file: file || '',
           status,
         });
 
