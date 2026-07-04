@@ -65,6 +65,32 @@ export const useAuthStore = create((set, get) => {
     },
 
     /**
+     * Authenticate and log in user using Google Credential Token.
+     */
+    loginWithGoogle: async (googleToken) => {
+      set({ loading: true });
+      try {
+        const response = await authService.loginWithGoogle(googleToken);
+        const token = response.token;
+        
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+        
+        set({
+          user: response.user,
+          token: token || null,
+          isAuthenticated: true,
+          loading: false,
+        });
+        return response;
+      } catch (error) {
+        set({ loading: false });
+        throw error;
+      }
+    },
+
+    /**
      * End user session and clear credentials.
      */
     logout: async () => {

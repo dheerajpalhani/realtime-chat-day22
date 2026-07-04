@@ -45,6 +45,42 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message',
+      default: null,
+    },
+    reactions: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        emoji: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    starredBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
+    forwarded: {
+      type: Boolean,
+      default: false,
+    },
+    edited: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

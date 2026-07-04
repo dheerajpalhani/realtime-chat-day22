@@ -10,6 +10,9 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 // Initialize express application
 const app = express();
@@ -55,6 +58,9 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/search', searchRoutes);
 
 // Health Check Route
 app.get('/', (req, res) => {

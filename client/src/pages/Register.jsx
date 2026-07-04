@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
@@ -8,10 +9,47 @@ import toast from 'react-hot-toast';
 const Register = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const authRegister = useAuthStore((state) => state.register);
+  const authLoginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
 
   const password = watch('password');
+
+  useEffect(() => {
+    const initGoogle = () => {
+      /* global google */
+      if (typeof google === 'undefined') {
+        setTimeout(initGoogle, 300); // Wait for script load
+        return;
+      }
+
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '1068832626600-k8f623ve5h1eb228v2d561miv0k7t74f.apps.googleusercontent.com';
+
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            try {
+              await authLoginWithGoogle(response.credential);
+              toast.success('Successfully authenticated with Google!');
+              navigate('/home');
+            } catch (err) {
+              toast.error(err.message || 'Google signup failed');
+            }
+          },
+        });
+
+        google.accounts.id.renderButton(
+          document.getElementById('google-signup-btn'),
+          { theme: 'outline', size: 'large', width: '380' }
+        );
+      } catch (err) {
+        console.warn('Google Sign-In initialization failed:', err);
+      }
+    };
+
+    initGoogle();
+  }, [authLoginWithGoogle, navigate]);
 
   const onSubmit = async (data) => {
     try {
@@ -119,12 +157,7 @@ const Register = () => {
                 className={`w-full pl-10 pr-4 py-2.5 bg-[#0F172A] text-white rounded-xl border ${errors.password ? 'border-red-500' : 'border-white/5'} focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/30 transition-all text-sm placeholder:text-slate-600`}
                 {...register('password', {
                   required: 'Password is required',
-                  minLength: { value: 8, message: 'Password must be at least 8 characters long' },
-                  validate: {
-                    hasUpper: (v) => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
-                    hasLower: (v) => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
-                    hasDigit: (v) => /[0-9]/.test(v) || 'Password must contain at least one number',
-                  }
+                  minLength: { value: 6, message: 'Password must be at least 6 characters' }
                 })}
               />
             </div>
@@ -160,6 +193,18 @@ const Register = () => {
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="flex items-center w-full my-4">
+          <div className="flex-1 border-t border-white/5"></div>
+          <span className="px-3 text-xs text-slate-500 uppercase font-semibold">Or</span>
+          <div className="flex-1 border-t border-white/5"></div>
+        </div>
+
+        {/* Google Authentication Anchor Button */}
+        <div className="w-full flex justify-center">
+          <div id="google-signup-btn" className="w-full max-w-xs h-[40px]"></div>
+        </div>
 
         {/* Footer Link */}
         <p className="mt-6 text-sm text-slate-400">

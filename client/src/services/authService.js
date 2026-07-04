@@ -41,6 +41,16 @@ const authService = {
     const response = await api.get('/auth/me');
     return response.data;
   },
+
+  /**
+   * Log in user using Google identity credential token.
+   * @param {string} googleToken - Google ID token
+   * @returns {Promise<Object>} API Response JSON
+   */
+  loginWithGoogle: async (googleToken) => {
+    const response = await api.post('/auth/google', { token: googleToken });
+    return response.data;
+  },
 };
 
 export default authService;

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
@@ -8,8 +9,45 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const authLogin = useAuthStore((state) => state.login);
+  const authLoginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const initGoogle = () => {
+      /* global google */
+      if (typeof google === 'undefined') {
+        setTimeout(initGoogle, 300); // Wait for external identity script load
+        return;
+      }
+
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '1068832626600-k8f623ve5h1eb228v2d561miv0k7t74f.apps.googleusercontent.com';
+
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            try {
+              await authLoginWithGoogle(response.credential);
+              toast.success('Successfully authenticated with Google!');
+              navigate('/home');
+            } catch (err) {
+              toast.error(err.message || 'Google Auth verification failed');
+            }
+          },
+        });
+
+        google.accounts.id.renderButton(
+          document.getElementById('google-signin-btn'),
+          { theme: 'outline', size: 'large', width: '380' }
+        );
+      } catch (err) {
+        console.warn('Google Sign-In initialization failed:', err);
+      }
+    };
+
+    initGoogle();
+  }, [authLoginWithGoogle, navigate]);
 
   const onSubmit = async (data) => {
     try {
@@ -112,7 +150,7 @@ const Login = () => {
               className="w-4 h-4 rounded border-white/5 bg-[#0F172A] text-[#2563EB] focus:ring-[#2563EB]/30 focus:ring-offset-[#1E293B]"
               {...register('rememberMe')}
             />
-            <label htmlFor="rememberMe" className="ml-2 text-sm text-slate-400 hover:text-slate-300 transition-all cursor-pointerSelect">
+            <label htmlFor="rememberMe" className="ml-2 text-sm text-slate-400 hover:text-slate-300 transition-all cursor-pointer">
               Remember Me
             </label>
           </div>
@@ -126,6 +164,18 @@ const Login = () => {
             {loading ? 'Logging In...' : 'Log In'}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="flex items-center w-full my-4">
+          <div className="flex-1 border-t border-white/5"></div>
+          <span className="px-3 text-xs text-slate-500 uppercase font-semibold">Or</span>
+          <div className="flex-1 border-t border-white/5"></div>
+        </div>
+
+        {/* Google Authentication Anchor Button */}
+        <div className="w-full flex justify-center">
+          <div id="google-signin-btn" className="w-full max-w-xs h-[40px]"></div>
+        </div>
 
         {/* Footer Link */}
         <p className="mt-6 text-sm text-slate-400">

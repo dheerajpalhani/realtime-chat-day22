@@ -9,7 +9,7 @@ import { isUserOnline } from '../utils/onlineUsers.js';
  */
 export const sendMessage = async (req, res) => {
   const senderId = req.user._id;
-  const { conversationId, receiverId, message, messageType } = req.body;
+  const { conversationId, receiverId, message, messageType, replyTo } = req.body;
 
   // 1. Verify that the conversation exists
   const conversation = await Conversation.findById(conversationId);
@@ -38,6 +38,7 @@ export const sendMessage = async (req, res) => {
     receiver: receiverId,
     message,
     messageType: messageType || 'text',
+    replyTo: replyTo || null,
     status,
   });
 
@@ -51,6 +52,7 @@ export const sendMessage = async (req, res) => {
   const populatedMessage = await Message.findById(newMessage._id)
     .populate('sender', '-password')
     .populate('receiver', '-password')
+    .populate('replyTo')
     .lean();
 
   // 6. Emit real-time events via Socket.IO
@@ -107,6 +109,7 @@ export const getMessages = async (req, res) => {
     .limit(limit)
     .populate('sender', '-password')
     .populate('receiver', '-password')
+    .populate('replyTo')
     .lean();
 
   // 4. Reverse array to return chronological order (newest messages at bottom)
@@ -153,6 +156,150 @@ export const deleteMessage = async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Message soft-deleted successfully',
+    data: updatedMessage,
+  });
+};
+
+/**
+ * @desc    Edit a message (only by the sender)
+ * @route   PUT /api/messages/:id
+ * @access  Private
+ */
+export const editMessage = async (req, res) => {
+  const messageId = req.params.id;
+  const { message } = req.body;
+  const userId = req.user._id;
+
+  const msg = await Message.findOne({ _id: messageId, sender: userId });
+  if (!msg) {
+    res.status(404);
+    throw new Error('Message not found or access denied');
+  }
+
+  msg.message = message;
+  msg.edited = true;
+  await msg.save();
+
+  const updatedMessage = await Message.findById(msg._id)
+    .populate('sender receiver', '-password')
+    .populate('replyTo')
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    message: 'Message edited successfully',
+    data: updatedMessage,
+  });
+};
+
+/**
+ * @desc    Toggle emoji reaction on a message
+ * @route   POST /api/messages/:id/reaction
+ * @access  Private
+ */
+export const toggleReaction = async (req, res) => {
+  const messageId = req.params.id;
+  const { emoji } = req.body;
+  const userId = req.user._id;
+
+  const msg = await Message.findById(messageId);
+  if (!msg) {
+    res.status(404);
+    throw new Error('Message not found');
+  }
+
+  const existingReactionIndex = msg.reactions.findIndex(
+    (r) => r.user.toString() === userId.toString()
+  );
+
+  if (existingReactionIndex > -1) {
+    if (msg.reactions[existingReactionIndex].emoji === emoji) {
+      // Remove reaction if same emoji
+      msg.reactions.splice(existingReactionIndex, 1);
+    } else {
+      // Update emoji if different
+      msg.reactions[existingReactionIndex].emoji = emoji;
+    }
+  } else {
+    // Add new reaction
+    msg.reactions.push({ user: userId, emoji });
+  }
+
+  await msg.save();
+
+  const updatedMessage = await Message.findById(msg._id)
+    .populate('sender receiver', '-password')
+    .populate('replyTo')
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    message: 'Reaction updated successfully',
+    data: updatedMessage,
+  });
+};
+
+/**
+ * @desc    Toggle pin status on a message
+ * @route   POST /api/messages/:id/pin
+ * @access  Private
+ */
+export const togglePin = async (req, res) => {
+  const messageId = req.params.id;
+
+  const msg = await Message.findById(messageId);
+  if (!msg) {
+    res.status(404);
+    throw new Error('Message not found');
+  }
+
+  msg.pinned = !msg.pinned;
+  await msg.save();
+
+  const updatedMessage = await Message.findById(msg._id)
+    .populate('sender receiver', '-password')
+    .populate('replyTo')
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    message: msg.pinned ? 'Message pinned' : 'Message unpinned',
+    data: updatedMessage,
+  });
+};
+
+/**
+ * @desc    Toggle star status on a message
+ * @route   POST /api/messages/:id/star
+ * @access  Private
+ */
+export const toggleStar = async (req, res) => {
+  const messageId = req.params.id;
+  const userId = req.user._id;
+
+  const msg = await Message.findById(messageId);
+  if (!msg) {
+    res.status(404);
+    throw new Error('Message not found');
+  }
+
+  const isStarred = msg.starredBy.includes(userId);
+  if (isStarred) {
+    msg.starredBy = msg.starredBy.filter((id) => id.toString() !== userId.toString());
+  } else {
+    msg.starredBy.push(userId);
+  }
+
+  await msg.save();
+
+  const updatedMessage = await Message.findById(msg._id)
+    .populate('sender receiver', '-password')
+    .populate('replyTo')
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    message: isStarred ? 'Message unstarred' : 'Message starred',
     data: updatedMessage,
   });
 };

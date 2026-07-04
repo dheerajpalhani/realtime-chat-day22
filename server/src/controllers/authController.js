@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 
@@ -145,6 +146,13 @@ export const logout = async (req, res) => {
     sameSite: 'strict',
   });
 
+  res.cookie('refreshToken', '', {
+    httpOnly: true,
+    expires: new Date(0), // Expire cookie immediately
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+
   res.status(200).json({
     success: true,
     message: 'Logged out successfully',
@@ -174,4 +182,125 @@ export const searchUsers = async (req, res) => {
     success: true,
     data: users,
   });
+};
+
+/**
+ * @desc    Generate a new access token using the refresh token
+ * @route   POST /api/auth/refresh
+ * @access  Public
+ */
+export const refreshAccessToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  
+  if (!refreshToken) {
+    return res.status(401).json({ success: false, message: 'Refresh token not provided' });
+  }
+
+  try {
+    const refreshSecret = process.env.JWT_REFRESH_SECRET || 'refresh_secret_fallback_key_4567';
+    const decoded = jwt.verify(refreshToken, refreshSecret);
+    
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'User profile not found' });
+    }
+
+    // Generate new access token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+      },
+    });
+  } catch (error) {
+    console.error('Token refresh error:', error.message);
+    res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+  }
+};
+
+/**
+ * @desc    Verify Google ID Token and register/login user profile
+ * @route   POST /api/auth/google
+ * @access  Public
+ */
+export const googleLogin = async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({ success: false, message: 'Google Credential Token is required' });
+  }
+
+  try {
+    // 1. Fetch Google verification endpoint using node fetch
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+    if (!response.ok) {
+      return res.status(401).json({ success: false, message: 'Failed to verify Google Credential Token' });
+    }
+
+    const payload = await response.json();
+    const { email, name, picture, sub } = payload;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Google account is missing email variables' });
+    }
+
+    // 2. Query MongoDB by email
+    let user = await User.findOne({ email });
+    if (!user) {
+      // 3. Setup clean username
+      let username = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      const usernameExists = await User.findOne({ username });
+      if (usernameExists) {
+        username = `${username}_${Math.floor(1000 + Math.random() * 9000)}`;
+      }
+
+      user = await User.create({
+        name: name || 'Google User',
+        username,
+        email,
+        password: `google_${sub}_dummy_password_${Math.random()}`,
+        avatar: picture || '',
+        bio: 'Joined ChatFlow using Google OAuth.',
+        isOnline: true,
+      });
+    } else {
+      user.isOnline = true;
+      await user.save();
+    }
+
+    // 4. Generate Access and Refresh Cookies
+    const accessToken = generateToken(res, user._id);
+
+    res.status(200).json({
+      success: true,
+      token: accessToken,
+      user: {
+        _id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+      },
+    });
+  } catch (error) {
+    console.error('Google OAuth Login failed:', error.message);
+    res.status(500).json({ success: false, message: 'Google OAuth failed: ' + error.message });
+  }
 };
