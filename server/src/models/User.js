@@ -3,16 +3,22 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: [true, 'Name is required'],
+      trim: true,
+    },
     username: {
       type: String,
-      required: [true, 'Please provide a username'],
+      required: [true, 'Username is required'],
       unique: true,
       trim: true,
+      lowercase: true,
       minlength: [3, 'Username must be at least 3 characters'],
     },
     email: {
       type: String,
-      required: [true, 'Please provide an email'],
+      required: [true, 'Email is required'],
       unique: true,
       trim: true,
       lowercase: true,
@@ -23,11 +29,15 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
-      minlength: [6, 'Password must be at least 6 characters'],
-      select: false,
+      required: [true, 'Password is required'],
+      minlength: [8, 'Password must be at least 8 characters'],
+      select: false, // Never return password in API responses by default
     },
     avatar: {
+      type: String,
+      default: '',
+    },
+    bio: {
       type: String,
       default: '',
     },
@@ -35,22 +45,31 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    lastSeen: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Encrypt password before saving
+// Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Match user-entered password with hashed password in database
+// Compare password method
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

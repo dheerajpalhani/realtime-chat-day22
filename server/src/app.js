@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Initialize express application
 const app = express();
@@ -49,6 +50,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // 4. API Routes
+app.use('/api/auth', authRoutes);
+
 // Health Check Route
 app.get('/', (req, res) => {
   res.status(200).json({
