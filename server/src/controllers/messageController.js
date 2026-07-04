@@ -1,5 +1,6 @@
 import Message from '../models/Message.js';
 import Conversation from '../models/Conversation.js';
+import { isUserOnline } from '../utils/onlineUsers.js';
 
 /**
  * @desc    Send a message within a conversation
@@ -26,16 +27,21 @@ export const sendMessage = async (req, res) => {
     throw new Error('Not authorized to send messages in this conversation');
   }
 
-  // 3. Save new message
+  // 3. Determine if receiver is online to set status
+  const receiverOnline = isUserOnline(receiverId);
+  const status = receiverOnline ? 'delivered' : 'sent';
+
+  // 4. Save new message
   const newMessage = await Message.create({
     conversation: conversationId,
     sender: senderId,
     receiver: receiverId,
     message,
     messageType: messageType || 'text',
+    status,
   });
 
-  // 4. Update the conversation metadata
+  // 5. Update the conversation metadata
   conversation.lastMessage = newMessage._id;
   conversation.lastMessageText = messageType === 'text' ? message : `[Sent a ${messageType}]`;
   conversation.lastMessageAt = newMessage.createdAt;
@@ -44,7 +50,24 @@ export const sendMessage = async (req, res) => {
   // Populate references
   const populatedMessage = await Message.findById(newMessage._id)
     .populate('sender', '-password')
-    .populate('receiver', '-password');
+    .populate('receiver', '-password')
+    .lean();
+
+  // 6. Emit real-time events via Socket.IO
+  const io = req.app.get('io');
+  if (io) {
+    // Relay the message to the conversation room
+    io.to(conversationId).emit('receive-message', populatedMessage);
+
+    // If online, broadcast message-delivered to the room
+    if (receiverOnline) {
+      io.to(conversationId).emit('message-delivered', {
+        conversationId,
+        messageId: newMessage._id,
+        status: 'delivered',
+      });
+    }
+  }
 
   res.status(201).json({
     success: true,
