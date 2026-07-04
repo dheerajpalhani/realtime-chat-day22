@@ -8,6 +8,8 @@ import rateLimit from 'express-rate-limit';
 
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
+import conversationRoutes from './routes/conversationRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 
 // Initialize express application
 const app = express();
@@ -51,6 +53,8 @@ app.use(cookieParser());
 
 // 4. API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Health Check Route
 app.get('/', (req, res) => {
