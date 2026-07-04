@@ -6,16 +6,17 @@ ChatFlow is a production-ready, AI-powered real-time messaging application simil
 
 ## Key Features
 
-1. **AI Coding Partner**: Google Gemini AI assistant with streaming SSE responses, markdown formatting, syntax highlighted code boxes, stop generation hooks, and copy buttons.
-2. **Real-Time Communication**: Socket.IO client-server handshakes, online/offline presence indicators, typing tickers, and message delivery checks.
-3. **Optimistic UI Update**: Rapid message rendering matching visual ticks, resolving temporary IDs dynamically once DB saves completed.
-4. **Offline Resilience**: Queue and buffer outgoing events while offline, flushing them automatically upon socket reconnection.
-5. **Rich Media Sharing**: Cloudinary direct streaming file loader (jpg, png, docs, audio notes) with Multer validations.
-6. **Voice Notes Recorder**: Waveform CSS animations and MediaRecorder audio encoding, saving directly to Cloudinary storage.
-7. **PWA Shell caching**: Progressive Web App manifest configurations and service worker caching supporting offline asset loads.
-8. **Refresh Token Rotation**: Triple-layer security using short access JWTs and rotated secure `refreshToken` HTTP-only cookies.
-9. **Global Debounced Search**: 300ms debounced queries searching users, active chats, and text logs with match text highlights.
-10. **Zustand Theme Engine**: Persisted Light/Dark theme settings synced with system settings.
+1. **Google Sign-In**: Secure authentication with Google Identity Services SDK, auto-registering first-time users.
+2. **AI Coding Partner**: Google Gemini AI assistant with streaming SSE responses, markdown formatting, syntax highlighted code boxes, stop generation hooks, and copy buttons.
+3. **Real-Time Communication**: Socket.IO client-server handshakes, online/offline presence indicators, typing tickers, and message delivery checks.
+4. **Optimistic UI Update**: Rapid message rendering matching visual ticks, resolving temporary IDs dynamically once DB saves completed.
+5. **Offline Resilience**: Queue and buffer outgoing events while offline, flushing them automatically upon socket reconnection.
+6. **Rich Media Sharing**: Cloudinary direct streaming file loader (jpg, png, docs, audio notes) with Multer validations.
+7. **Voice Notes Recorder**: Waveform CSS animations and MediaRecorder audio encoding, saving directly to Cloudinary storage.
+8. **PWA Shell caching**: Progressive Web App manifest configurations and service worker caching supporting offline asset loads.
+9. **Refresh Token Rotation**: Triple-layer security using short access JWTs and rotated secure `refreshToken` HTTP-only cookies.
+10. **Global Debounced Search**: 300ms debounced queries searching users, active chats, and text logs with match text highlights.
+11. **Zustand Theme Engine**: Persisted Light/Dark theme settings synced with system settings.
 
 ---
 
@@ -58,6 +59,7 @@ day-22/
 - MongoDB Atlas cluster URL
 - Cloudinary Storage Account credentials
 - Google Gemini API Key
+- Google OAuth Client ID (from Google Cloud Console)
 
 ### Backend Setup
 1. Navigate to the server folder:
@@ -94,7 +96,12 @@ day-22/
    ```bash
    npm install
    ```
-3. Launch frontend:
+3. Configure the `.env` file matching:
+   ```env
+   VITE_GOOGLE_CLIENT_ID=your_google_client_id_goes_here.apps.googleusercontent.com
+   VITE_API_URL=http://localhost:5000/api
+   ```
+4. Launch frontend:
    ```bash
    npm run dev
    ```
@@ -107,6 +114,7 @@ day-22/
 ### Auth Endpoints (`/api/auth`)
 - `POST /register`: Register user account.
 - `POST /login`: Generate access token and secure cookies.
+- `POST /google`: Verify Google credential token and sign user in.
 - `POST /refresh`: Rotate refresh token cookie, returning new access JWT.
 - `POST /logout`: Destroy session cookies.
 - `GET /me`: Get logged in user details.
