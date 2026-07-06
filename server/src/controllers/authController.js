@@ -280,8 +280,7 @@ export const googleLogin = async (req, res) => {
         isOnline: true,
       });
     } else {
-      user.isOnline = true;
-      await user.save();
+      await User.findByIdAndUpdate(user._id, { isOnline: true });
     }
 
     // 4. Generate Access and Refresh Cookies

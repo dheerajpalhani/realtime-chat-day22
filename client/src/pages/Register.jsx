@@ -157,7 +157,12 @@ const Register = () => {
                 className={`w-full pl-10 pr-4 py-2.5 bg-[#0F172A] text-white rounded-xl border ${errors.password ? 'border-red-500' : 'border-white/5'} focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/30 transition-all text-sm placeholder:text-slate-600`}
                 {...register('password', {
                   required: 'Password is required',
-                  minLength: { value: 6, message: 'Password must be at least 6 characters' }
+                  minLength: { value: 8, message: 'Password must be at least 8 characters long' },
+                  validate: {
+                    hasUpper: (v) => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
+                    hasLower: (v) => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
+                    hasDigit: (v) => /[0-9]/.test(v) || 'Password must contain at least one number',
+                  }
                 })}
               />
             </div>
