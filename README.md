@@ -105,7 +105,7 @@ day-22/
    ```bash
    npm run dev
    ```
-4. Access client at `http://localhost:5173/`.
+4. Access client at `http://localhost:5300/`.
 
 ---
 
