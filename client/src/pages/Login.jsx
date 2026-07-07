@@ -69,10 +69,40 @@ const Login = () => {
       toast.error(err.message || 'Login failed. Please check credentials.');
     }
   };
-
   const handleForgotPassword = (e) => {
     e.preventDefault();
     toast.error('Password reset is not implemented in this version.');
+  };
+
+  const handleDemoLogin = async () => {
+    const demoEmail = 'demo@chatflow.com';
+    const demoPassword = 'DemoPassword123';
+    const authRegister = useAuthStore.getState().register;
+    
+    const toastId = toast.loading('Initializing demo session...');
+    try {
+      // 1. Try to login directly
+      await authLogin({ email: demoEmail, password: demoPassword });
+      toast.success('Successfully logged in as Demo User!', { id: toastId });
+      navigate('/home');
+    } catch (err) {
+      // 2. If login fails, try to register the demo account automatically
+      try {
+        await authRegister({
+          name: 'Demo User',
+          username: 'demouser',
+          email: demoEmail,
+          password: demoPassword,
+        });
+        
+        // 3. Log in after registration
+        await authLogin({ email: demoEmail, password: demoPassword });
+        toast.success('Demo account created and logged in!', { id: toastId });
+        navigate('/home');
+      } catch (regErr) {
+        toast.error(regErr.message || 'Failed to initialize demo session', { id: toastId });
+      }
+    }
   };
 
   return (
@@ -176,6 +206,15 @@ const Login = () => {
         <div className="w-full flex justify-center">
           <div id="google-signin-btn" className="w-full max-w-xs h-[40px]"></div>
         </div>
+
+        {/* Demo Login Button */}
+        <button
+          onClick={handleDemoLogin}
+          type="button"
+          className="w-full mt-4 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center text-sm shadow-md"
+        >
+          Login as Guest / Demo User
+        </button>
 
         {/* Footer Link */}
         <p className="mt-6 text-sm text-slate-400">
