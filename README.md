@@ -101,6 +101,8 @@ day-22/
    VITE_GOOGLE_CLIENT_ID=your_google_client_id_goes_here.apps.googleusercontent.com
    VITE_API_URL=http://localhost:5000/api
    ```
+   > [!NOTE]
+   > To obtain a `VITE_GOOGLE_CLIENT_ID`, create credentials in the Google Cloud Console (Web Application type). Ensure `http://localhost:5300` is added under **Authorized JavaScript Origins** and **Authorized Redirect URIs**, and list your testing email in the OAuth consent test users.
 4. Launch frontend:
    ```bash
    npm run dev
