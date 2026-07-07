@@ -24,7 +24,7 @@ const Navbar = () => {
         <div className="w-10 h-10 rounded-xl bg-[#2563EB] flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
           <FiMessageSquare className="w-5 h-5 text-white" />
         </div>
-        <span className="bg-gradient-to-r from-white via-slate-200 to-[#38BDF8] bg-clip-text text-transparent">
+        <span className="logo-gradient">
           ChatFlow
         </span>
       </Link>

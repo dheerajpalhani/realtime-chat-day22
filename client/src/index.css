@@ -11,6 +11,10 @@
   
   --border-color: rgba(0, 229, 255, 0.2);
   
+  /* Logo Gradients */
+  --logo-from: #0F172A;
+  --logo-to: #2563EB;
+  
   /* Neon Accents */
   --neon-cyan: #00E5FF;
   --neon-purple: #D500F9;
@@ -24,10 +28,13 @@
   --bg-tertiary: #04060D;
   
   --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --text-muted: #64748B;
+  --text-secondary: #E2E8F0;
+  --text-muted: #94A3B8;
   
-  --border-color: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.08);
+  
+  --logo-from: #FFFFFF;
+  --logo-to: #38BDF8;
 }
 
 @layer base {
@@ -37,10 +44,19 @@
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
+  
+  /* Prevent browser defaults from overriding link colors */
+  a {
+    color: inherit;
+  }
 }
 
 /* Global utility overrides to map hardcoded dark colors to light-neon variables */
+.bg-\[\#0F172A\]\/50,
 .bg-\[\#0F172A\]\/40,
+.bg-\[\#0F172A\]\/30,
+.bg-\[\#0F172A\]\/20,
+.bg-\[\#0F172A\]\/10,
 .bg-\[\#0F172A\] {
   background-color: var(--bg-primary) !important;
 }
@@ -110,6 +126,15 @@ input, textarea {
 input::placeholder, textarea::placeholder {
   color: var(--text-muted) !important;
   opacity: 0.7;
+}
+
+/* Brand logo gradient class */
+.logo-gradient {
+  background: linear-gradient(to right, var(--logo-from), var(--logo-to)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
 }
 
 /* Highlights and icons matching neon schema */
