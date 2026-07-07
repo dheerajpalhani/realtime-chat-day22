@@ -39,7 +39,7 @@ const Login = () => {
 
         google.accounts.id.renderButton(
           document.getElementById('google-signin-btn'),
-          { theme: 'outline', size: 'large', width: '380' }
+          { theme: 'outline', size: 'large', width: 384, alignment: 'center' }
         );
       } catch (err) {
         console.warn('Google Sign-In initialization failed:', err);
@@ -55,7 +55,7 @@ const Login = () => {
         email: data.email,
         password: data.password,
       });
-      
+
       // Save local preferences if Remember Me is ticked
       if (data.rememberMe) {
         localStorage.setItem('remembered_email', data.email);
@@ -78,7 +78,7 @@ const Login = () => {
     const demoEmail = 'demo@chatflow.com';
     const demoPassword = 'DemoPassword123';
     const authRegister = useAuthStore.getState().register;
-    
+
     const toastId = toast.loading('Initializing demo session...');
     try {
       // 1. Try to login directly
@@ -94,7 +94,7 @@ const Login = () => {
           email: demoEmail,
           password: demoPassword,
         });
-        
+
         // 3. Log in after registration
         await authLogin({ email: demoEmail, password: demoPassword });
         toast.success('Demo account created and logged in!', { id: toastId });
@@ -122,7 +122,7 @@ const Login = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
-          
+
           {/* Email Address */}
           <div>
             <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
@@ -204,7 +204,7 @@ const Login = () => {
 
         {/* Google Authentication Anchor Button */}
         <div className="w-full flex justify-center">
-          <div id="google-signin-btn" className="w-full max-w-xs h-[40px]"></div>
+          <div id="google-signin-btn" className="w-full h-[40px]"></div>
         </div>
 
         {/* Demo Login Button */}

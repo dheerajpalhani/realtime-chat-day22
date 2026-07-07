@@ -41,7 +41,7 @@ const Register = () => {
 
         google.accounts.id.renderButton(
           document.getElementById('google-signup-btn'),
-          { theme: 'outline', size: 'large', width: '380' }
+          { theme: 'outline', size: 'large', width: 384, alignment: 'center' }
         );
       } catch (err) {
         console.warn('Google Sign-In initialization failed:', err);
@@ -208,7 +208,7 @@ const Register = () => {
 
         {/* Google Authentication Anchor Button */}
         <div className="w-full flex justify-center">
-          <div id="google-signup-btn" className="w-full max-w-xs h-[40px]"></div>
+          <div id="google-signup-btn" className="w-full h-[40px]"></div>
         </div>
 
         {/* Footer Link */}
