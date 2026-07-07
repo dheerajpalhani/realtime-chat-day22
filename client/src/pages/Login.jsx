@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
 import { motion } from 'framer-motion';
-import { FiMail, FiLock, FiMessageSquare } from 'react-icons/fi';
+import { useThemeStore } from '../store/themeStore.js';
+import { FiMail, FiLock, FiMessageSquare, FiSun, FiMoon } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Login = () => {
@@ -12,6 +13,7 @@ const Login = () => {
   const authLoginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useThemeStore();
 
   useEffect(() => {
     const initGoogle = () => {
@@ -106,7 +108,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4 relative">
+      {/* Floating Theme Toggle */}
+      <div className="absolute top-4 right-4 z-50">
+        <button
+          onClick={toggleTheme}
+          type="button"
+          className="p-3 rounded-xl bg-white dark:bg-[#1E293B] hover:bg-slate-100 dark:hover:bg-[#334155] border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 transition-all duration-300 shadow-lg cursor-pointer"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? <FiSun className="w-5 h-5 text-amber-400" /> : <FiMoon className="w-5 h-5 text-indigo-500" />}
+        </button>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

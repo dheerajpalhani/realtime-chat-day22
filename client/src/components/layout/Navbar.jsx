@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore.js';
-import { FiLogOut, FiUser, FiMessageSquare } from 'react-icons/fi';
+import { useThemeStore } from '../../store/themeStore.js';
+import { FiLogOut, FiUser, FiMessageSquare, FiSun, FiMoon } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
   const { user, logout } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
 
   const handleLogout = async () => {
     try {
@@ -48,6 +50,15 @@ const Navbar = () => {
             <span className="hidden sm:inline text-sm font-semibold text-slate-200">{user.name}</span>
           </Link>
         )}
+
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className="p-3 rounded-xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-[#334155] border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 transition-all duration-300 shadow-md cursor-pointer"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? <FiSun className="w-4 h-4 text-amber-400" /> : <FiMoon className="w-4 h-4 text-indigo-500" />}
+        </button>
 
         <button
           onClick={handleLogout}
