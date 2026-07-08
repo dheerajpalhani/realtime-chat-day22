@@ -34,7 +34,7 @@ export const register = async (req, res) => {
 
   if (user) {
     // Generate JWT token and set HTTP-only cookie
-    generateToken(res, user._id);
+    const token = generateToken(res, user._id);
 
     // Build user profile response (excluding sensitive details like password)
     const userResponse = {
@@ -53,6 +53,7 @@ export const register = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
+      token,
       user: userResponse,
     });
   } else {

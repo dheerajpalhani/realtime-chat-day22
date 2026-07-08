@@ -24,10 +24,15 @@ export const useAuthStore = create((set, get) => {
       set({ loading: true });
       try {
         const response = await authService.register(userData);
+        const token = response.token;
         
-        // If registration returns a token in cookie/headers, we fetch profile
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+        
         set({
           user: response.user,
+          token: token || null,
           isAuthenticated: true,
           loading: false,
         });

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a reusable Axios instance pointing to the backend REST API
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   withCredentials: true, // Send HTTP cookies automatically
 });
 
