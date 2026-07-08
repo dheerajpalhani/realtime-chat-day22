@@ -72,7 +72,8 @@ export const useAIStore = create((set, get) => ({
     try {
       const token = localStorage.getItem('token');
       // Execute fetch with stream support using native reader
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const baseUrl = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl.replace(/\/$/, '')}/api`;
       const response = await fetch(`${baseUrl}/ai/chat`, {
         method: 'POST',
         headers: {

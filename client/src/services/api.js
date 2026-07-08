@@ -1,8 +1,13 @@
 import axios from 'axios';
 
 // Create a reusable Axios instance pointing to the backend REST API
+const getBaseURL = () => {
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  return url.endsWith('/api') ? url : `${url.replace(/\/$/, '')}/api`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseURL(),
   withCredentials: true, // Send HTTP cookies automatically
 });
 
