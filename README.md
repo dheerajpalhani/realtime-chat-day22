@@ -13,7 +13,7 @@ ChatFlow is a production-ready, AI-powered real-time messaging application simil
 5. **Offline Resilience**: Queue and buffer outgoing events while offline, flushing them automatically upon socket reconnection.
 6. **Rich Media Sharing**: Cloudinary direct streaming file loader (jpg, png, docs, audio notes) with Multer validations.
 7. **Voice Notes Recorder**: Waveform CSS animations and MediaRecorder audio encoding, saving directly to Cloudinary storage.
-8. **PWA Shell caching**: Progressive Web App manifest configurations and service worker caching supporting offline asset loads.
+8. **PWA Shell Caching**: Progressive Web App manifest configurations and service worker caching supporting offline asset loads.
 9. **Refresh Token Rotation**: Triple-layer security using short access JWTs and rotated secure `refreshToken` HTTP-only cookies.
 10. **Global Debounced Search**: 300ms debounced queries searching users, active chats, and text logs with match text highlights.
 11. **Zustand Theme Engine**: Persisted Light/Dark theme settings synced with system settings.
@@ -22,7 +22,7 @@ ChatFlow is a production-ready, AI-powered real-time messaging application simil
 
 ## Folder Structure
 
-```
+```text
 day-22/
 ├── client/
 │   ├── public/
@@ -30,11 +30,13 @@ day-22/
 │   │   └── sw.js               # Offline service worker
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ai/             # AIChatDrawer, AIMessageBubble
-│   │   │   └── chat/           # SearchPanel, ImageViewer, VoiceRecorder
+│   │   │   ├── ai/             # AIChatDrawer, AIMessageBubble, AIPromptInput
+│   │   │   ├── chat/           # ChatHeader, MessageInput, MessageList, SearchModal, SearchPanel
+│   │   │   └── layout/         # MainLayout, Navbar, Sidebar
 │   │   ├── store/
-│   │   │   ├── authStore.js
-│   │   │   ├── chatStore.js    # Consolidated socket actions
+│   │   │   ├── aiStore.js      # persistent state for AI bot interactions
+│   │   │   ├── authStore.js    # authentication and user profile state
+│   │   │   ├── chatStore.js    # active chats, socket events, and message buffers
 │   │   │   └── themeStore.js   # persisted light/dark states
 │   │   ├── socket/
 │   │   │   └── socket.js       # Connection singleton with offline queue
@@ -42,12 +44,17 @@ day-22/
 │   │   └── main.jsx
 ├── server/
 │   ├── src/
-│   │   ├── controllers/        # auth, message, conversation, upload, ai, search
-│   │   ├── models/             # User, Conversation, Message
-│   │   ├── routes/             # auth, message, conversation, upload, ai, search
+│   │   ├── config/             # DB connection logic (db.js)
+│   │   ├── controllers/        # auth, conversation, message, upload, ai, search controllers
+│   │   ├── middleware/         # auth token validation, global error handling, file upload
+│   │   ├── models/             # Conversation, Message, User models
+│   │   ├── routes/             # API routing (auth, conversation, message, upload, ai, search)
 │   │   ├── sockets/
-│   │   │   └── socketManager.js # Handshake verification and message relaying
-│   │   └── app.js
+│   │   │   └── socketManager.js # Socket handshake validation & message relaying
+│   │   ├── utils/              # Online user tracking and helper utilities
+│   │   ├── validations/        # Request payload validators
+│   │   ├── app.js              # Express app setup and middleware registration
+│   │   └── server.js           # Server entry point
 ```
 
 ---
@@ -56,9 +63,9 @@ day-22/
 
 ### Prerequisites
 - Node.js (v18+)
-- MongoDB Atlas cluster URL
-- Cloudinary Storage Account credentials
-- Google Gemini API Key
+- MongoDB Atlas cluster URL or local MongoDB instance
+- Cloudinary Storage Account credentials (optional, fallback to memory base64 is active)
+- Google Gemini API Key (optional, mock fallback mode is active)
 - Google OAuth Client ID (from Google Cloud Console)
 
 ### Backend Setup
@@ -76,16 +83,23 @@ day-22/
    NODE_ENV=development
    MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/chatflow
    JWT_SECRET=your_jwt_access_secret_key_123
-   JWT_REFRESH_SECRET=your_jwt_refresh_secret_key_456
+   CLIENT_URL=http://localhost:5300
+   # Media Upload (Cloudinary) - Optional
    CLOUDINARY_CLOUD_NAME=your_cloud_name
    CLOUDINARY_API_KEY=your_cloudinary_api_key
    CLOUDINARY_API_SECRET=your_cloudinary_secret
+   # Gemini AI API Key - Optional
    GEMINI_API_KEY=your_google_gemini_api_key
    ```
 4. Launch backend:
-   ```bash
-   npm start
-   ```
+   - For **Development** (runs with nodemon/hot reloading):
+     ```bash
+     npm run dev
+     ```
+   - For **Production**:
+     ```bash
+     npm start
+     ```
 
 ### Frontend Setup
 1. Navigate to the client folder:
@@ -107,7 +121,7 @@ day-22/
    ```bash
    npm run dev
    ```
-4. Access client at `http://localhost:5300/`.
+5. Access client at `http://localhost:5300/`.
 
 ---
 
@@ -130,6 +144,21 @@ day-22/
 - `POST /:id/reaction`: Add/remove emoji reactions.
 - `POST /:id/pin`: Toggle pin status.
 - `POST /:id/star`: Toggle star status.
+
+### Conversations Endpoints (`/api/conversations`)
+- `POST /`: Create or retrieve a conversation with a specified user.
+- `GET /`: Retrieve all active conversations for the authenticated user.
+- `GET /:id`: Retrieve a specific conversation by ID.
+
+### AI Endpoints (`/api/ai`)
+- `POST /chat`: Stream query response from the AI assistant via Server-Sent Events (SSE).
+- `GET /history`: Load conversational history with the AI assistant.
+
+### Upload Endpoints (`/api/upload`)
+- `POST /`: Upload a single media file (images, audio, or document attachments) to Cloudinary.
+
+### Search Endpoints (`/api/search`)
+- `GET /?query=...`: Execute unified debounced queries searching users, active conversations, and text logs.
 
 ---
 
