@@ -119,7 +119,7 @@ const MessageList = () => {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.15 }}
-                className={`relative max-w-[70%] px-4 py-2.5 rounded-2xl group flex flex-col gap-1 shadow-md ${
+                className={`relative max-w-[85%] md:max-w-[70%] px-4 py-2.5 rounded-2xl group flex flex-col gap-1 shadow-md ${
                   isMe 
                     ? 'chat-bubble-sent text-white' 
                     : 'chat-bubble-received text-slate-200'

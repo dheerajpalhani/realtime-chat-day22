@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar.jsx';
 import Sidebar from './Sidebar.jsx';
+import AIChatDrawer from '../ai/AIChatDrawer.jsx';
 import { useChatStore } from '../../store/chatStore.js';
 
 /**
@@ -8,11 +10,12 @@ import { useChatStore } from '../../store/chatStore.js';
  */
 const MainLayout = () => {
   const { activeConversation } = useChatStore();
+  const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0F172A]">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0F172A] relative">
       {/* Top Navigation */}
-      <Navbar />
+      <Navbar onAIToggle={() => setIsAIDrawerOpen((prev) => !prev)} />
       
       {/* Body Area */}
       <div className="flex flex-1 overflow-hidden">
@@ -26,6 +29,9 @@ const MainLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Embedded AI Assistant Panel Overlay */}
+      <AIChatDrawer isOpen={isAIDrawerOpen} onClose={() => setIsAIDrawerOpen(false)} />
     </div>
   );
 };

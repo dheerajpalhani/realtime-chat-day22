@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore.js';
 import { useThemeStore } from '../../store/themeStore.js';
 import { FiLogOut, FiUser, FiMessageSquare, FiSun, FiMoon } from 'react-icons/fi';
+import { IoSparkles } from 'react-icons/io5';
 import toast from 'react-hot-toast';
 
-const Navbar = () => {
+const Navbar = ({ onAIToggle }) => {
   const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
 
@@ -50,6 +51,15 @@ const Navbar = () => {
             <span className="hidden sm:inline text-sm font-semibold text-slate-200">{user.name}</span>
           </Link>
         )}
+
+        {/* AI Drawer Toggle Button */}
+        <button
+          onClick={onAIToggle}
+          className="p-3 rounded-xl bg-blue-500/10 text-[#38BDF8] hover:bg-blue-500 hover:text-white border border-blue-500/20 transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center"
+          title="AI Coding Partner"
+        >
+          <IoSparkles className="w-4 h-4" />
+        </button>
 
         {/* Theme Toggle Button */}
         <button

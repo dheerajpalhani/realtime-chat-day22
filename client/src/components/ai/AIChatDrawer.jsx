@@ -3,7 +3,8 @@ import { useAIStore } from '../../store/aiStore.js';
 import AIMessageBubble from './AIMessageBubble.jsx';
 import AIPromptInput from './AIPromptInput.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiSparkles, FiMessageSquare } from 'react-icons/fi';
+import { FiX, FiMessageSquare } from 'react-icons/fi';
+import { IoSparkles } from 'react-icons/io5';
 
 const AIChatDrawer = ({ isOpen, onClose }) => {
   const messagesEndRef = useRef(null);
@@ -59,7 +60,7 @@ const AIChatDrawer = ({ isOpen, onClose }) => {
             <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#1E293B]/40 backdrop-blur-md">
               <div className="flex items-center gap-2 text-white">
                 <div className="p-2 rounded-xl bg-blue-500/10 text-[#38BDF8] border border-blue-500/20 shadow-md">
-                  <FiSparkles className="w-5 h-5 animate-pulse" />
+                  <IoSparkles className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm tracking-wide">AI Coding Partner</h3>
@@ -84,7 +85,7 @@ const AIChatDrawer = ({ isOpen, onClose }) => {
                 /* Empty state / Suggested prompt listing */
                 <div className="h-full flex flex-col justify-center items-center text-center p-4">
                   <div className="p-4 rounded-full bg-blue-500/5 border border-white/5 mb-4 text-[#38BDF8]">
-                    <FiSparkles className="w-10 h-10 animate-bounce" />
+                    <IoSparkles className="w-10 h-10 animate-bounce" />
                   </div>
                   <h4 className="text-white font-bold text-base mb-1">Meet ChatFlow AI</h4>
                   <p className="text-slate-400 text-xs max-w-xs leading-relaxed mb-6">
