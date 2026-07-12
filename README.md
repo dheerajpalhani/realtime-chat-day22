@@ -17,6 +17,10 @@ ChatFlow is a production-ready, AI-powered real-time messaging application simil
 9. **Refresh Token Rotation**: Triple-layer security using short access JWTs and rotated secure `refreshToken` HTTP-only cookies.
 10. **Global Debounced Search**: 300ms debounced queries searching users, active chats, and text logs with match text highlights.
 11. **Zustand Theme Engine**: Persisted Light/Dark theme settings synced with system settings.
+12. **Light-Neon / Dark-Neon Theme Engine**: Custom dual-theme design system mapped to HSL/Hex CSS variable tokens for clean, high-contrast, modern neon branding.
+13. **Auto-creating Guest / Demo User**: Integrated mock-free test session button creating `demo@chatflow.com` dynamically on the fly to preview features immediately.
+14. **Mobile Native Responsiveness**: Dynamic screen transitions hiding sidebar during active chats on mobile viewports, including header back navigation.
+15. **Strict Port Allocation**: Client locked strictly on port `5300` in `vite.config.js` to match production and local Google Identity Services callback scopes.
 
 ---
 
